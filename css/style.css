@@ -1181,3 +1181,39 @@ body {
         width: 48px;
     }
 }
+
+/* Bugfix: extracted PPTX icons are white/transparent; give them contrast */
+.problem-icon {
+    width: 86px;
+    height: 86px;
+    margin: 0 auto var(--spacing) auto;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 999px;
+    padding: 18px;
+}
+
+.problem-icon-img {
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.datasource-icon-img {
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    padding: 12px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    object-fit: contain;
+    box-shadow: 0 6px 14px rgba(45, 90, 45, 0.14);
+}
+
+.empty-state {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0;
+}

@@ -25,7 +25,8 @@ Esta é uma apresentação visual interativa (não um relatório acadêmico) que
 ├── js/
 │   └── app.js             # Lógica interativa (Leaflet, Charts.js)
 ├── data/
-│   └── predicoes_demo.geojson  # Dados de talhões (Bahia)
+│   ├── predicoes_demo_light.geojson  # Dados completos simplificados para GitHub Pages
+│   └── predicoes_demo.geojson        # Amostra/fallback dos talhões (Bahia)
 ├── assets/
 │   ├── img/               # Imagens dos gráficos
 │   └── charts/            # Gráficos e ilustrações
@@ -297,7 +298,7 @@ fetch('https://sua-api.com/talhoes')
 ## 🐛 Troubleshooting
 
 ### Mapa não carrega
-- Verifique se `data/predicoes_demo.geojson` existe
+- Verifique se `data/predicoes_demo_light.geojson` ou `data/predicoes_demo.geojson` existe
 - Abra Console (F12) e procure erros
 
 ### Gráficos não aparecem

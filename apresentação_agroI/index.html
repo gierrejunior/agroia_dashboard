@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroIA - Agrointeligência Territorial</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span class="logo-icon">🌾</span>
+                <span class="logo-text">AgroIA</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#hero" class="nav-link">Início</a></li>
+                <li><a href="#problema" class="nav-link">Problema</a></li>
+                <li><a href="#solucao" class="nav-link">Solução</a></li>
+                <li><a href="#demo" class="nav-link">Demo</a></li>
+                <li><a href="#metricas" class="nav-link">Métricas</a></li>
+                <li><a href="#monitoramento" class="nav-link">Monitoramento</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Agrointeligência Territorial</h1>
+            <p class="hero-subtitle">Análise de risco e monitoramento de lavouras por satélite em escala nacional</p>
+            <button class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">
+                Explorar Demonstração
+            </button>
+        </div>
+        <div class="hero-background"></div>
+    </section>
+
+    <!-- Problema -->
+    <section id="problema" class="section">
+        <div class="container">
+            <h2 class="section-title">O Desafio do Crédito e Seguro Rural</h2>
+            <div class="problems-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">📅</div>
+                    <h3>Dados Defasados</h3>
+                    <p>Bases públicas podem ser anuais ou apresentam defasagem de 1-2 anos</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🔍</div>
+                    <h3>Identificação Limitada</h3>
+                    <p>Sem identificação direta e escalável da cultura por talhão e safra</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">📋</div>
+                    <h3>Vistorias Pontuais</h3>
+                    <p>Vistorias tradicionais não escalam para grandes carteiras de clientes</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">⚠️</div>
+                    <h3>Alertas Tardios</h3>
+                    <p>Sinais de risco muitas vezes aparecem tarde demais para ação preventiva</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solução -->
+    <section id="solucao" class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">A Solução AgroIA</h2>
+            <p class="section-subtitle">Uma camada de inteligência territorial integrada a múltiplas fontes de dados</p>
+
+            <div class="datasources-grid">
+                <div class="datasource-item">
+                    <span class="datasource-icon">🛰️</span>
+                    <span>Sentinel-1/2</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">🌱</span>
+                    <span>MapBiomas</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">🔭</span>
+                    <span>PRODES</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">📍</span>
+                    <span>CAR/SIGEF</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">📊</span>
+                    <span>ZARC</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">📈</span>
+                    <span>IBGE</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">🎯</span>
+                    <span>Talhões Segmentados</span>
+                </div>
+                <div class="datasource-item">
+                    <span class="datasource-icon">📉</span>
+                    <span>Séries Temporais</span>
+                </div>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <h3>Monitoramento Contínuo</h3>
+                    <p>Acompanhamento em tempo quase real durante todo o ciclo produtivo</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Análise de Risco</h3>
+                    <p>Identificação automática de anomalias e desvios de comportamento</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Escalabilidade</h3>
+                    <p>Cobertura de centenas de milhões de hectares sem limite operacional</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Interativa -->
+    <section id="demo" class="section">
+        <div class="container">
+            <h2 class="section-title">Demonstração Interativa</h2>
+            <p class="section-subtitle">Navegue pelos talhões da Bahia e explore as classificações de cultura</p>
+        </div>
+
+        <div class="demo-container">
+            <!-- Painel Lateral Esquerdo -->
+            <div class="demo-sidebar left">
+                <div class="filter-group">
+                    <label class="filter-label">Camada Temática</label>
+                    <select id="layerSelect" class="filter-select">
+                        <option value="inf_safra1">AgroIA - Safra 1</option>
+                        <option value="inf_safra2">AgroIA - Safra 2</option>
+                        <option value="mb_safra1">MapBiomas - Safra 1</option>
+                        <option value="mb_safra2">MapBiomas - Safra 2</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Basemap</label>
+                    <select id="basemapSelect" class="filter-select">
+                        <option value="osm">OpenStreetMap</option>
+                        <option value="satellite">Satélite</option>
+                        <option value="terrain">Terreno</option>
+                        <option value="light">Claro</option>
+                        <option value="dark">Escuro</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Buscar Município</label>
+                    <input type="text" id="municipioSearch" class="filter-input" placeholder="Digite o município...">
+                </div>
+
+                <button id="clearFiltersBtn" class="btn btn-secondary">Limpar Filtros</button>
+                <button id="fitBoundsBtn" class="btn btn-secondary">Encaixar Todos</button>
+
+                <div class="legend-box">
+                    <h3 class="legend-title">Legenda</h3>
+                    <div id="legendContent" class="legend-content">
+                        <!-- Preenchido dinamicamente -->
+                    </div>
+                </div>
+
+                <div class="stats-box">
+                    <h3 class="stats-title">Resumo</h3>
+                    <div id="statsContent" class="stats-content">
+                        <!-- Preenchido dinamicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa -->
+            <div id="map" class="demo-map"></div>
+
+            <!-- Painel Lateral Direito -->
+            <div class="demo-sidebar right">
+                <div class="chart-container">
+                    <h3 class="chart-title">Distribuição de Classes</h3>
+                    <canvas id="distributionChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Comparação AgroIA vs MapBiomas</h3>
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Concordância</h3>
+                    <canvas id="concordanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Métricas de Acurácia -->
+    <section id="metricas" class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">Métricas de Desempenho</h2>
+            <p class="section-subtitle">Comparação de acurácia entre AgroIA e MapBiomas</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-source">AgroIA</div>
+                    <div class="metric-item">
+                        <span class="metric-label">Acurácia Geral</span>
+                        <span class="metric-value">79,3%</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-source">AgroIA</div>
+                    <div class="metric-item">
+                        <span class="metric-label">Acurácia Média/Classe</span>
+                        <span class="metric-value">72,6%</span>
+                        <span class="metric-note">Importante para risco diversificado</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-source">MapBiomas</div>
+                    <div class="metric-item">
+                        <span class="metric-label">Acurácia Geral</span>
+                        <span class="metric-value">86,1%</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-source">MapBiomas</div>
+                    <div class="metric-item">
+                        <span class="metric-label">Acurácia Média/Classe</span>
+                        <span class="metric-value">57,3%</span>
+                        <span class="metric-note">Desbalanceamento entre classes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <h3>Insight Principal</h3>
+                <p>Enquanto MapBiomas tem acurácia geral superior, AgroIA mantém melhor equilíbrio entre classes. Para carteiras de crédito/seguro diversificadas, a acurácia média por classe é crítica para evitar sub/super-estimação de risco em culturas específicas.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fenologia e ZARC -->
+    <section id="fenologia" class="section">
+        <div class="container">
+            <h2 class="section-title">Fenologia e ZARC</h2>
+            <p class="section-subtitle">Ciclos vegetativos e janelas de plantio recomendadas</p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot">1</div>
+                    <div class="timeline-content">
+                        <h3>SOS</h3>
+                        <p>Início da Safra</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">2</div>
+                    <div class="timeline-content">
+                        <h3>POS</h3>
+                        <p>Pico Vegetativo</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">3</div>
+                    <div class="timeline-content">
+                        <h3>EOS</h3>
+                        <p>Fim da Safra</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">4</div>
+                    <div class="timeline-content">
+                        <h3>ZARC</h3>
+                        <p>Janela Recomendada</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fenologia-stats">
+                <div class="fenologia-stat">
+                    <span class="stat-number">439K</span>
+                    <span class="stat-label">Ciclos Fenológicos Detectados</span>
+                </div>
+                <div class="fenologia-stat">
+                    <span class="stat-number">691</span>
+                    <span class="stat-label">Municípios Cobertos</span>
+                </div>
+                <div class="fenologia-stat">
+                    <span class="stat-number">2.9</span>
+                    <span class="stat-label">Ciclos Médios/Talhão</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Monitoramento e Alertas -->
+    <section id="monitoramento" class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">Monitoramento e Alertas</h2>
+            <p class="section-subtitle">Sistema de detecção de anomalias e risco</p>
+
+            <div class="alerts-grid">
+                <div class="alert-card alert-low">
+                    <div class="alert-icon">✓</div>
+                    <h3>Risco Baixo</h3>
+                    <p>Desenvolvimento dentro do esperado para o período</p>
+                    <ul class="alert-examples">
+                        <li>AgroIA e MapBiomas concordam</li>
+                        <li>Padrão espectral normal</li>
+                        <li>Plantio na janela ZARC</li>
+                    </ul>
+                </div>
+
+                <div class="alert-card alert-medium">
+                    <div class="alert-icon">⚠</div>
+                    <h3>Risco Médio</h3>
+                    <p>Alguns sinais de atenção identificados</p>
+                    <ul class="alert-examples">
+                        <li>Divergência em uma safra</li>
+                        <li>Desenvolvimento abaixo da média</li>
+                        <li>Mudança gradual de padrão</li>
+                    </ul>
+                </div>
+
+                <div class="alert-card alert-high">
+                    <div class="alert-icon">!</div>
+                    <h3>Risco Alto</h3>
+                    <p>Indicadores críticos que exigem investigação</p>
+                    <ul class="alert-examples">
+                        <li>Discordância em ambas safras</li>
+                        <li>Queda abrupta de vigor vegetativo</li>
+                        <li>Risco sistêmico regional</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AgroIA - Agrointeligência Territorial. Demonstração interativa.</p>
+            <p>Para uso completo da plataforma, consulte documentação em <a href="#" class="footer-link">agroIA.com</a></p>
+        </div>
+    </footer>
+
+    <!-- Voltar ao Topo -->
+    <button id="backToTopBtn" class="back-to-top" onclick="document.body.scrollTop=0; document.documentElement.scrollTop=0;">↑</button>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/leaflet.markercluster.min.js"></script>
+
+    <!-- App -->
+    <script src="js/app.js"></script>
+</body>
+</html>

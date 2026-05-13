@@ -15,7 +15,13 @@ const CONFIG = {
         2: "#0d4a73",    // Algodão - Azul
         3: "#9b59b6"     // Outros - Roxo
     },
-    geojsonUrl: 'data/predicoes_demo.geojson'
+    geojsonUrl: 'data/predicoes_demo_light.geojson',
+    geojsonFallbackUrls: [
+        'data/predicoes_demo_light.geojson',
+        'data/predicoes_demo.geojson',
+        'predicoes_consolidadas_BA.geojson'
+    ],
+    noDataColor: '#d9d9d9'
 };
 
 let map, geoJsonLayer, chartInstances = {};
@@ -64,17 +70,48 @@ function initMap() {
    CARREGAMENTO DE DADOS
    ============================================================================ */
 
-function loadGeoJson() {
-    fetch(CONFIG.geojsonUrl)
-        .then(res => res.json())
-        .then(data => {
+async function loadGeoJson() {
+    const urls = CONFIG.geojsonFallbackUrls || [CONFIG.geojsonUrl];
+    let lastError = null;
+
+    updateLegend();
+    setStatsMessage('Carregando talhões...');
+
+    for (const url of urls) {
+        try {
+            console.log(`Tentando carregar GeoJSON: ${url}`);
+            const res = await fetch(url);
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status} ao carregar ${url}`);
+            }
+
+            const data = await res.json();
+
+            if (!data || !Array.isArray(data.features) || data.features.length === 0) {
+                throw new Error(`GeoJSON sem features válidas: ${url}`);
+            }
+
             currentData = data;
+            console.log('GeoJSON carregado:', url);
+            console.log('Número de features:', data.features.length);
+            console.log('Primeira feature:', data.features[0]);
+            console.log('Propriedades da primeira feature:', data.features[0]?.properties);
+
             createGeoJsonLayer();
             updateCharts();
             updateLegend();
             updateStats();
-        })
-        .catch(err => console.error('Erro ao carregar GeoJSON:', err));
+            updateLayerReading();
+            return;
+        } catch (err) {
+            console.warn('Falha ao carregar GeoJSON:', err);
+            lastError = err;
+        }
+    }
+
+    console.error('Erro ao carregar todos os GeoJSONs:', lastError);
+    setStatsMessage('Erro ao carregar GeoJSON. Verifique se os arquivos estão na pasta data/.');
 }
 
 function createGeoJsonLayer() {
@@ -90,13 +127,17 @@ function createGeoJsonLayer() {
             layer.on('click', () => showPopup(feature, layer));
         }
     }).addTo(map);
+
+    const bounds = geoJsonLayer.getBounds();
+    if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [20, 20] });
+    }
 }
 
 function getFeatureStyle(feature, layer) {
-    const props = feature.properties;
-    const value = props[layer];
-    const classNum = Math.floor(value);
-    const color = CONFIG.classColors[classNum] || CONFIG.classColors[3];
+    const props = feature.properties || {};
+    const classNum = normalizeClassValue(props[layer]);
+    const color = CONFIG.classColors[classNum] || CONFIG.noDataColor;
 
     const risk = calculateRisk(props);
 
@@ -167,7 +208,7 @@ function showPopup(feature, layer) {
                 <span class="popup-subtitle">Avaliação de Risco (Demonstrativa)</span>
                 <div style="margin-top: 8px;">
                     <span class="risk-badge risk-${risk}">
-                        ${this._getRiskIcon(risk)} ${risk.toUpperCase()}
+                        ${_getRiskIcon(risk)} ${risk.toUpperCase()}
                     </span>
                 </div>
                 <p style="font-size: 11px; color: #999; margin: 8px 0 0 0;">
@@ -190,17 +231,27 @@ function _getRiskIcon(risk) {
 
 Object.assign(window, { _getRiskIcon });
 
+function normalizeClassValue(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const num = Number(value);
+    if (!Number.isFinite(num)) return null;
+    const classNum = Math.floor(num);
+    return Object.prototype.hasOwnProperty.call(CONFIG.classMap, classNum) ? classNum : null;
+}
+
 function getClassName(value) {
-    const classNum = Math.floor(value);
-    return CONFIG.classMap[classNum] || 'Desconhecido';
+    const classNum = normalizeClassValue(value);
+    return classNum === null ? 'Sem dado' : CONFIG.classMap[classNum];
 }
 
 function calculateRisk(props) {
     // Lógica demonstrativa simples de risco
-    const agro1 = Math.floor(props.inf_safra1);
-    const agro2 = Math.floor(props.inf_safra2);
-    const map1 = Math.floor(props.mb_safra1);
-    const map2 = Math.floor(props.mb_safra2);
+    const agro1 = normalizeClassValue(props.inf_safra1);
+    const agro2 = normalizeClassValue(props.inf_safra2);
+    const map1 = normalizeClassValue(props.mb_safra1);
+    const map2 = normalizeClassValue(props.mb_safra2);
+
+    if ([agro1, agro2, map1, map2].some(v => v === null)) return 'medio';
 
     const agree1 = agro1 === map1;
     const agree2 = agro2 === map2;
@@ -245,9 +296,12 @@ function filterByMunicipio(search) {
     if (search) {
         filtered = {
             type: 'FeatureCollection',
-            features: currentData.features.filter(f =>
-                f.properties.municipio.toLowerCase().includes(search)
-            )
+            features: currentData.features.filter(f => {
+                const props = f.properties || {};
+                const municipio = String(props.municipio ?? '').toLowerCase();
+                const codMun = String(props.cod_mun ?? '').toLowerCase();
+                return municipio.includes(search) || codMun.includes(search);
+            })
         };
     }
 
@@ -258,6 +312,11 @@ function filterByMunicipio(search) {
             layer.on('click', () => showPopup(feature, layer));
         }
     }).addTo(map);
+
+    const bounds = geoJsonLayer.getBounds();
+    if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [20, 20] });
+    }
 
     updateCharts(filtered);
     updateStats(filtered);
@@ -302,8 +361,8 @@ function updateDistributionChart(data, layer) {
     }
 
     data.features.forEach(f => {
-        const value = Math.floor(f.properties[layer]);
-        counts[value] = (counts[value] || 0) + 1;
+        const value = normalizeClassValue(f.properties?.[layer]);
+        if (value !== null) counts[value] = (counts[value] || 0) + 1;
     });
 
     const ctx = document.getElementById('distributionChart').getContext('2d');
@@ -350,10 +409,14 @@ function updateComparisonChart(data) {
 
     data.features.forEach(f => {
         const p = f.properties;
-        agro1[Math.floor(p.inf_safra1)]++;
-        agro2[Math.floor(p.inf_safra2)]++;
-        map1[Math.floor(p.mb_safra1)]++;
-        map2[Math.floor(p.mb_safra2)]++;
+        const a1 = normalizeClassValue(p.inf_safra1);
+        const a2 = normalizeClassValue(p.inf_safra2);
+        const m1 = normalizeClassValue(p.mb_safra1);
+        const m2 = normalizeClassValue(p.mb_safra2);
+        if (a1 !== null) agro1[a1]++;
+        if (a2 !== null) agro2[a2]++;
+        if (m1 !== null) map1[m1]++;
+        if (m2 !== null) map2[m2]++;
     });
 
     const ctx = document.getElementById('comparisonChart').getContext('2d');
@@ -400,10 +463,12 @@ function updateConcordanceChart(data) {
 
     data.features.forEach(f => {
         const p = f.properties;
-        const a1 = Math.floor(p.inf_safra1);
-        const m1 = Math.floor(p.mb_safra1);
-        const a2 = Math.floor(p.inf_safra2);
-        const m2 = Math.floor(p.mb_safra2);
+        const a1 = normalizeClassValue(p.inf_safra1);
+        const m1 = normalizeClassValue(p.mb_safra1);
+        const a2 = normalizeClassValue(p.inf_safra2);
+        const m2 = normalizeClassValue(p.mb_safra2);
+
+        if ([a1, m1, a2, m2].some(v => v === null)) return;
 
         if ((a1 === m1) && (a2 === m2)) {
             agree++;
@@ -413,8 +478,8 @@ function updateConcordanceChart(data) {
     });
 
     const total = agree + disagree;
-    const agreePercent = ((agree / total) * 100).toFixed(1);
-    const disagreePercent = ((disagree / total) * 100).toFixed(1);
+    const agreePercent = total ? ((agree / total) * 100).toFixed(1) : '0.0';
+    const disagreePercent = total ? ((disagree / total) * 100).toFixed(1) : '0.0';
 
     const ctx = document.getElementById('concordanceChart').getContext('2d');
 
@@ -460,18 +525,36 @@ function updateLegend() {
         `;
         legendContent.appendChild(item);
     }
+
+    const noDataItem = document.createElement('div');
+    noDataItem.className = 'legend-item';
+    noDataItem.innerHTML = `
+        <div class="legend-color" style="background-color: ${CONFIG.noDataColor};"></div>
+        <span>Sem dado</span>
+    `;
+    legendContent.appendChild(noDataItem);
 }
 
 /* ============================================================================
    ESTATÍSTICAS
    ============================================================================ */
 
+function setStatsMessage(message) {
+    const statsContent = document.getElementById('statsContent');
+    if (statsContent) statsContent.innerHTML = `<p class="empty-state">${message}</p>`;
+}
+
 function updateStats(data = null) {
     data = data || currentData;
     const statsContent = document.getElementById('statsContent');
 
+    if (!data || !Array.isArray(data.features) || data.features.length === 0) {
+        setStatsMessage('Nenhum talhão encontrado');
+        return;
+    }
+
     const totalFeatures = data.features.length;
-    const municipios = new Set(data.features.map(f => f.properties.municipio)).size;
+    const municipios = new Set(data.features.map(f => f.properties?.municipio ?? f.properties?.cod_mun).filter(Boolean)).size;
 
     statsContent.innerHTML = `
         <div class="stat-item">
