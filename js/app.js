@@ -98,12 +98,32 @@ function getFeatureStyle(feature, layer) {
     const classNum = Math.floor(value);
     const color = CONFIG.classColors[classNum] || CONFIG.classColors[3];
 
+    const risk = calculateRisk(props);
+
+    let weight = 0.5;
+    let fillOpacity = 0.6;
+    let borderColor = '#555';
+
+    if (risk === 'alto') {
+        weight = 2;
+        fillOpacity = 0.8;
+        borderColor = '#e74c3c';
+    } else if (risk === 'medio') {
+        weight = 1;
+        fillOpacity = 0.7;
+        borderColor = '#f39c12';
+    } else {
+        weight = 0.5;
+        fillOpacity = 0.6;
+        borderColor = '#27ae60';
+    }
+
     return {
         fillColor: color,
-        weight: 0.5,
-        opacity: 0.7,
-        color: '#555',
-        fillOpacity: 0.6,
+        weight: weight,
+        opacity: 0.9,
+        color: borderColor,
+        fillOpacity: fillOpacity,
         dashArray: '3'
     };
 }
@@ -121,20 +141,54 @@ function showPopup(feature, layer) {
     let html = `
         <div class="popup-content">
             <h3>${props.municipio || 'N/A'}</h3>
-            <table class="popup-table">
-                <tr><td>Código IBGE:</td><td><strong>${props.cod_mun || 'N/A'}</strong></td></tr>
-                <tr><td>AgroIA Safra 1:</td><td><strong>${getClassName(props.inf_safra1)}</strong></td></tr>
-                <tr><td>AgroIA Safra 2:</td><td><strong>${getClassName(props.inf_safra2)}</strong></td></tr>
-                <tr><td>MapBiomas Safra 1:</td><td><strong>${getClassName(props.mb_safra1)}</strong></td></tr>
-                <tr><td>MapBiomas Safra 2:</td><td><strong>${getClassName(props.mb_safra2)}</strong></td></tr>
-                <tr><td>Risco (Demo):</td><td><strong class="risk-${risk}">${risk.toUpperCase()}</strong></td></tr>
-            </table>
-            <p class="popup-note">* Análise demonstrativa - não representa avaliação oficial de risco</p>
+            <div class="popup-section">
+                <span class="popup-subtitle">Classificações</span>
+                <table class="popup-table">
+                    <tr>
+                        <td>AgroIA S1:</td>
+                        <td><strong>${getClassName(props.inf_safra1)}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>AgroIA S2:</td>
+                        <td><strong>${getClassName(props.inf_safra2)}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>MapBiomas S1:</td>
+                        <td><strong>${getClassName(props.mb_safra1)}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>MapBiomas S2:</td>
+                        <td><strong>${getClassName(props.mb_safra2)}</strong></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="popup-section" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;">
+                <span class="popup-subtitle">Avaliação de Risco (Demonstrativa)</span>
+                <div style="margin-top: 8px;">
+                    <span class="risk-badge risk-${risk}">
+                        ${this._getRiskIcon(risk)} ${risk.toUpperCase()}
+                    </span>
+                </div>
+                <p style="font-size: 11px; color: #999; margin: 8px 0 0 0;">
+                    Baseado em concordância entre AgroIA e MapBiomas
+                </p>
+            </div>
+
+            <p class="popup-note">⚠️ Análise demonstrativa - não representa avaliação oficial de risco</p>
         </div>
     `;
 
     layer.bindPopup(html).openPopup();
 }
+
+function _getRiskIcon(risk) {
+    if (risk === 'alto') return '🔴';
+    if (risk === 'medio') return '🟡';
+    return '🟢';
+}
+
+Object.assign(window, { _getRiskIcon });
 
 function getClassName(value) {
     const classNum = Math.floor(value);
@@ -161,9 +215,19 @@ function calculateRisk(props) {
    ============================================================================ */
 
 document.getElementById('layerSelect').addEventListener('change', () => {
+    const layerSelect = document.getElementById('layerSelect');
+    const originalLabel = layerSelect.parentElement.querySelector('.filter-label');
+
     createGeoJsonLayer();
     updateCharts();
     updateLegend();
+    updateLayerReading();
+
+    // Visual feedback
+    layerSelect.style.borderColor = '#4a7c4a';
+    setTimeout(() => {
+        layerSelect.style.borderColor = '';
+    }, 600);
 });
 
 document.getElementById('municipioSearch').addEventListener('keyup', (e) => {
@@ -422,6 +486,23 @@ function updateStats(data = null) {
 }
 
 /* ============================================================================
+   LEITURA DA CAMADA ATUAL
+   ============================================================================ */
+
+const layerReadings = {
+    inf_safra1: "Classificação estimada pelo AgroIA para a primeira safra, permitindo avaliar cultura predominante por talhão.",
+    inf_safra2: "Classificação estimada pelo AgroIA para a segunda safra, útil para identificar sucessão de culturas e dinâmica produtiva.",
+    mb_safra1: "Referência pública usada para comparação espacial e validação cruzada.",
+    mb_safra2: "Camada pública comparativa para observar divergências e concordâncias com a inferência AgroIA."
+};
+
+function updateLayerReading() {
+    const currentLayer = document.getElementById('layerSelect').value;
+    const readingText = document.getElementById('layerReading');
+    readingText.textContent = layerReadings[currentLayer] || 'Camada selecionada.';
+}
+
+/* ============================================================================
    BACK TO TOP
    ============================================================================ */
 
@@ -440,6 +521,7 @@ window.addEventListener('scroll', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
+    updateLayerReading();
 });
 
 /* ============================================================================
@@ -449,30 +531,78 @@ document.addEventListener('DOMContentLoaded', () => {
 const style = document.createElement('style');
 style.textContent = `
     .popup-content {
-        min-width: 300px;
+        min-width: 320px;
         font-size: 13px;
     }
 
     .popup-content h3 {
-        margin: 0 0 10px 0;
+        margin: 0 0 15px 0;
         color: #2d5a2d;
         font-size: 16px;
+        font-weight: 600;
+    }
+
+    .popup-section {
+        margin-bottom: 0;
+    }
+
+    .popup-subtitle {
+        display: block;
+        font-weight: 600;
+        color: #2d5a2d;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
     }
 
     .popup-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 10px;
+        margin-bottom: 0;
     }
 
     .popup-table td {
-        padding: 5px;
-        border-bottom: 1px solid #eee;
+        padding: 6px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 12px;
     }
 
     .popup-table td:first-child {
+        font-weight: 500;
+        color: #555;
+        width: 45%;
+    }
+
+    .popup-table td:last-child {
+        text-align: right;
+    }
+
+    .risk-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
         font-weight: 600;
-        width: 50%;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    .risk-badge.risk-baixo {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .risk-badge.risk-medio {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .risk-badge.risk-alto {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
     }
 
     .risk-baixo { color: #27ae60; font-weight: 600; }
@@ -481,9 +611,9 @@ style.textContent = `
 
     .popup-note {
         font-size: 11px;
-        color: #999;
-        margin: 10px 0 0 0;
-        font-style: italic;
+        color: #e74c3c;
+        margin: 12px 0 0 0;
+        font-weight: 500;
     }
 `;
 document.head.appendChild(style);

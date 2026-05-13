@@ -522,6 +522,33 @@ body {
 }
 
 /* ============================================================================
+   LAYER READING BOX
+   ============================================================================ */
+
+.layer-reading-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    padding: var(--spacing-md);
+    border-radius: 0.5rem;
+    margin-bottom: var(--spacing-lg);
+    border: 2px solid var(--primary);
+    border-left-width: 5px;
+}
+
+.reading-title {
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.95rem;
+}
+
+.reading-text {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ============================================================================
    MÉTRICAS
    ============================================================================ */
 
@@ -1037,5 +1064,114 @@ body {
 
     .modal-image {
         max-height: 70vh;
+    }
+}
+
+/* ============================================================================
+   ICON INTEGRATION STYLES (Phase 2)
+   ============================================================================ */
+
+/* Generic Icon Sizing Classes */
+.icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing);
+}
+
+.icon-lg {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    display: block;
+}
+
+.icon-md {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: block;
+}
+
+.icon-sm {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Problem Card Icon Images */
+.problem-icon-img {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    object-fit: contain;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.problem-card:hover .problem-icon-img {
+    transform: scale(1.1);
+}
+
+/* Data Source Icon Images */
+.datasource-icon-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+/* Alert/Risk Icon Images */
+.alert-icon-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Fenologia/Process Step Icons */
+.fenologia-step-icon {
+    width: 56px;
+    height: auto;
+    margin: 0 auto 8px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Methodology Pipeline Supplement Icons */
+.methodology-step-indicator {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: inline-block;
+    margin: 0 4px;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.methodology-step-indicator:hover {
+    opacity: 1;
+}
+
+/* Icon Responsive Adjustments */
+@media (max-width: 768px) {
+    .problem-icon-img,
+    .icon-lg {
+        width: 48px;
+        height: 48px;
+    }
+
+    .datasource-icon-img,
+    .icon-md {
+        width: 40px;
+        height: 40px;
+    }
+
+    .fenologia-step-icon {
+        width: 48px;
     }
 }

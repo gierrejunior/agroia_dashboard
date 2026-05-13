@@ -201,6 +201,14 @@
 
             <!-- Painel Lateral Direito -->
             <div class="demo-sidebar right">
+                <!-- Leitura da Camada Atual -->
+                <div class="layer-reading-box">
+                    <h3 class="reading-title">Leitura da Camada Atual</h3>
+                    <p id="layerReading" class="reading-text">
+                        Classificação estimada pelo AgroIA para a primeira safra, permitindo avaliar cultura predominante por talhão.
+                    </p>
+                </div>
+
                 <div class="chart-container">
                     <h3 class="chart-title">Distribuição de Classes</h3>
                     <canvas id="distributionChart"></canvas>
@@ -215,6 +223,20 @@
                     <h3 class="chart-title">Concordância</h3>
                     <canvas id="concordanceChart"></canvas>
                 </div>
+            </div>
+        </div>
+
+        <!-- Evidência Visual da Classificação -->
+        <div class="container" style="margin-top: 60px;">
+            <div class="image-showcase" style="max-width: 900px; margin: 0 auto;">
+                <img src="assets/charts/image10.png" alt="Comparação espacial de classificações por safra"
+                     class="showcase-image"
+                     style="cursor: zoom-in;"
+                     onclick="openImageModal('assets/charts/image10.png', 'Comparação espacial de classificações por safra')">
+                <div class="image-showcase-title">Comparação espacial de classificações por safra</div>
+                <p style="color: #666; font-size: 14px; margin: 10px 0 0 0; line-height: 1.5;">
+                    Visual comparativo entre classificações agrícolas em escala de talhão, apoiando a leitura espacial das diferenças entre AgroIA, MapBiomas e referência.
+                </p>
             </div>
         </div>
     </section>
