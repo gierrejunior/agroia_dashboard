@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Visual - Imagens PPTX AgroIA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            max-width: 1600px;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .image-panel {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .image-panel img {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            cursor: zoom-in;
+        }
+        .image-panel img:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .image-info {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #2d5a2d;
+        }
+        .analysis-form {
+            background: #f0f8f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2d5a2d;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        button {
+            background: #2d5a2d;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #4a7c4a;
+        }
+        h1 {
+            color: #2d5a2d;
+            grid-column: 1 / -1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+        }
+        .modal img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 95vw;
+            max-height: 95vh;
+            border: 3px solid #2d5a2d;
+            border-radius: 8px;
+        }
+        .modal .close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal .close:hover {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📸 Análise Visual - Imagens Extraídas do PPTX AgroIA</h1>
+<p style="grid-column: 1/-1; color: #666;">
+    <strong>Instruções:</strong> Visualize cada imagem. Clique para ampliar. Preencha o formulário com suas observações.
+    Cole todas as análises ao final em um arquivo texto ou markdown.
+</p>
+
+<div class="container" id="container"></div>
+
+<div id="imageModal" class="modal" onclick="this.style.display='none'">
+    <img id="modalImage" src="" alt="">
+    <span class="close">&times;</span>
+</div>
+
+<script>
+const images = [
+    {num: 1, size: '2454×2024', kb: 254},
+    {num: 2, size: '256×256', kb: 3},
+    {num: 3, size: '256×256', kb: 4.9},
+    {num: 4, size: '256×256', kb: 3.9},
+    {num: 5, size: '256×256', kb: 4.2},
+    {num: 6, size: '256×256', kb: 4.2},
+    {num: 7, size: '256×256', kb: 2.5},
+    {num: 8, size: '1774×887', kb: 1666},
+    {num: 9, size: '2100×900', kb: 85.5},
+    {num: 10, size: '1920×1080', kb: 856},
+    {num: 11, size: '256×256', kb: 5.6},
+    {num: 12, size: '256×256', kb: 3.1},
+    {num: 13, size: '4141×2942', kb: 1018},
+    {num: 14, size: '256×256', kb: 5},
+    {num: 15, size: '256×256', kb: 4.4},
+    {num: 16, size: '256×256', kb: 3},
+    {num: 17, size: '4146×1659', kb: 317},
+    {num: 18, size: '4146×2908', kb: 529},
+    {num: 19, size: '256×256', kb: 4.8},
+    {num: 20, size: '256×256', kb: 3.3}
+];
+
+const container = document.getElementById('container');
+const modal = document.getElementById('imageModal');
+const modalImage = document.getElementById('modalImage');
+
+images.forEach(img => {
+    const panel = document.createElement('div');
+    panel.className = 'image-panel';
+
+    const imgPath = `assets/charts/image${img.num}.png`;
+    const imgElement = document.createElement('img');
+    imgElement.src = imgPath;
+    imgElement.alt = `image${img.num}`;
+    imgElement.style.cursor = 'zoom-in';
+    imgElement.onclick = (e) => {
+        e.stopPropagation();
+        modalImage.src = imgPath;
+        modal.style.display = 'block';
+    };
+
+    const info = document.createElement('div');
+    info.className = 'image-info';
+    info.innerHTML = `
+        <strong>image${img.num}.png</strong><br>
+        ${img.size} | ${img.kb}KB
+    `;
+
+    const form = document.createElement('div');
+    form.className = 'analysis-form';
+    form.innerHTML = `
+        <div class="form-group">
+            <label>O que você vê na imagem?</label>
+            <textarea placeholder="Descreva o conteúdo visual..." id="desc${img.num}"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Texto visível (títulos, rótulos)?</label>
+            <textarea placeholder="Liste qualquer texto visível..." id="text${img.num}"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Tipo de imagem:</label>
+            <select id="type${img.num}">
+                <option value="">-- Selecione --</option>
+                <option value="mapa">Mapa</option>
+                <option value="grafico">Gráfico/Chart</option>
+                <option value="serie_temporal">Série temporal</option>
+                <option value="matriz_confusao">Matriz de confusão</option>
+                <option value="fluxograma">Fluxograma/Pipeline</option>
+                <option value="screenshot">Screenshot/Slide</option>
+                <option value="icone">Ícone</option>
+                <option value="logo">Logo</option>
+                <option value="incerto">Incerto/Precisa revisão</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Deve ser usada na demo?</label>
+            <select id="use${img.num}">
+                <option value="">-- Selecione --</option>
+                <option value="sim_card">Sim - Como card principal</option>
+                <option value="sim_asset">Sim - Como asset (ícone/apoio)</option>
+                <option value="nao">Não - Descartar</option>
+                <option value="incerto">Incerto</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Se usar como card: onde na página?</label>
+            <textarea placeholder="Ex: Fenologia/ZARC, Métricas, Demo Interativa..." id="local${img.num}"></textarea>
+        </div>
+    `;
+
+    panel.appendChild(imgElement);
+    panel.appendChild(info);
+    panel.appendChild(form);
+    container.appendChild(panel);
+});
+
+// Export function
+window.exportAnalysis = function() {
+    let output = '# ANÁLISE VISUAL - RESULTADO\n\n';
+
+    images.forEach(img => {
+        output += `## image${img.num}.png (${img.size}, ${img.kb}KB)\n\n`;
+        output += `**Descrição:** ${document.getElementById(`desc${img.num}`).value || '[não preenchido]'}\n\n`;
+        output += `**Texto visível:** ${document.getElementById(`text${img.num}`).value || '[nenhum]'}\n\n`;
+        output += `**Tipo:** ${document.getElementById(`type${img.num}`).value || '[não definido]'}\n\n`;
+        output += `**Usar?:** ${document.getElementById(`use${img.num}`).value || '[não definido]'}\n\n`;
+        output += `**Localização:** ${document.getElementById(`local${img.num}`).value || '[N/A]'}\n\n`;
+        output += '---\n\n';
+    });
+
+    alert('Análise copiada para clipboard. Cole em um arquivo de texto.');
+    console.log(output);
+    navigator.clipboard.writeText(output);
+};
+
+// Close modal
+document.querySelector('.modal .close').onclick = () => {
+    modal.style.display = 'none';
+};
+</script>
+
+<div style="grid-column: 1/-1; margin-top: 40px; padding: 20px; background: white; border-radius: 8px; text-align: center;">
+    <button onclick="exportAnalysis()" style="padding: 12px 30px; font-size: 14px;">
+        📋 EXPORTAR ANÁLISE COMPLETA
+    </button>
+    <p style="margin-top: 10px; color: #666; font-size: 12px;">
+        Clique para copiar toda a análise formatada para o clipboard
+    </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Arquivos do Sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+
+# Dados grandes (manter GeoJSON demo, remover completo)
+predicoes_consolidadas_BA.geojson
+predicoes_consolidadas_BA.gpkg
+
+# Logs
+*.log
+
+# Build/Dist
+dist/
+build/
+calendario_plantio_zarc.xlsx
+GEE_IV_MT_sentinel2-20260513T002341Z-3-001.zip
+GEE_IV_MT_sentinel2-20260513T002341Z-3-002.zip
+*.zip
+*.xlsx
+*.gpkg
+*.ogg
